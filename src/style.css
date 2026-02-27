@@ -39,3 +39,20 @@ button {
   background: #ffffff;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
+.screen {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.screen h1,
+.screen h2 {
+  font-size: 36px;
+}
+
+.screen button {
+  padding: 22px;
+  font-size: 22px;
+  border-radius: 20px;
+  margin-top: 18px;
+}
