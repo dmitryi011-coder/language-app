@@ -1,3 +1,5 @@
+import './style.css'
+
 let currentLanguage = null
 
 document.querySelector('#app').innerHTML = `
