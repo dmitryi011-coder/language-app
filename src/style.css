@@ -14,37 +14,36 @@ body {
 
 #app {
   width: 100%;
-  max-width: 420px;
-  padding: 30px 20px;
+  max-width: 480px;
+  padding: 40px 24px;
   text-align: center;
 }
 
 h1 {
-  font-size: 32px;
-  margin-bottom: 30px;
+  font-size: 44px;
+  margin-bottom: 36px;
 }
 
 h2 {
-  font-size: 24px;
-  margin-bottom: 25px;
+  font-size: 32px;
+  margin-bottom: 28px;
 }
 
 button {
   width: 100%;
-  padding: 16px;
-  margin-top: 12px;
-  font-size: 18px;
-  border-radius: 12px;
+  padding: 20px;
+  margin-top: 18px;
+  font-size: 22px;
+  border-radius: 18px;
   border: none;
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
 }
 
 button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 button:hover {
   background: #f0f0f0;
 }
-body { background: yellow !important; }

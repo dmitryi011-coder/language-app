@@ -1,7 +1,7 @@
 let currentLanguage = null
 
 document.querySelector('#app').innerHTML = `
-  <div style="padding:20px; font-family:Arial;">
+`<div class="screen">`
     <h1>Language App</h1>
     <button id="addLang">Добавить язык</button>
     <div id="languages" style="margin-top:20px;"></div>
@@ -41,7 +41,7 @@ document.querySelector('#addLang').addEventListener('click', () => {
 renderLanguages()
 function renderLanguageScreen() {
   document.querySelector('#app').innerHTML = `
-    <div style="padding:20px; font-family:Arial;">
+    `<div class="screen">`
       <h1>${currentLanguage}</h1>
       <button id="addWord">Добавить слово</button>
       <button id="library" style="margin-left:10px;">Библиотека</button>
@@ -102,7 +102,7 @@ function renderLibraryScreen() {
   const cards = JSON.parse(localStorage.getItem(key)) || []
 
   let listHtml = cards.map(c => `
-    <div style="border:1px solid #ddd; padding:10px; margin-top:10px;">
+    `<div class="screen">`
       <div><b>RU:</b> ${c.front}</div>
       <div><b>SL:</b> ${c.answer}</div>
       <div><b>Note:</b> ${c.note || ''}</div>
@@ -152,7 +152,7 @@ if (!learnCards.length) {
   const card = learnCards[Math.floor(Math.random() * learnCards.length)]
 
   document.querySelector('#app').innerHTML = `
-    <div style="padding:20px; font-family:Arial;">
+    `<div class="screen">`
       <h2>${currentLanguage} — Обучение</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
@@ -197,7 +197,7 @@ function startLearning() {
   // если в режиме изучения вообще нет слов (ARCHIVE игнорируем)
   if (!L.length && !Q.length && !R.length) {
     document.querySelector('#app').innerHTML = `
-      <div style="padding:20px; font-family:Arial;">
+      `<div class="screen">`
         <h2>${currentLanguage}</h2>
         <p>Нет слов для изучения (всё в архиве или пусто).</p>
         <button id="backHome">Назад</button>
@@ -245,7 +245,7 @@ function renderQuizScreen() {
   const options = [card.answer, ...shuffledWrong.slice(0, 3)].sort(() => 0.5 - Math.random())
 
   document.querySelector('#app').innerHTML = `
-    <div style="padding:20px; font-family:Arial;">
+  `<div class="screen">`
       <h2>${currentLanguage} — Квиз</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
@@ -322,7 +322,7 @@ localStorage.setItem(`lastCard:${currentLanguage}`, card.id)
 
 
   document.querySelector('#app').innerHTML = `
-    <div style="padding:20px; font-family:Arial;">
+`<div class="screen">`
       <h2>${currentLanguage} — Проверка</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
@@ -381,7 +381,7 @@ function startArchiveMode() {
   const card = archiveCards[Math.floor(Math.random() * archiveCards.length)]
 
   document.querySelector('#app').innerHTML = `
-    <div style="padding:20px; font-family:Arial;">
+`<div class="screen">`
       <h2>${currentLanguage} — Повтор архива</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
