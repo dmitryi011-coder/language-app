@@ -181,15 +181,17 @@ function renderLearnScreen() {
   document.querySelector('#app').innerHTML = `
     <div class="screen">
       <h2>${currentLanguage} — Обучение</h2>
-      <div style="margin-top:20px; font-size:22px;">
-        ${card.front}
-      </div>
-      <div style="margin-top:10px; color:gray;">
-        ${card.answer}
-      </div>
-      <div style="margin-top:10px; font-size:12px;">
-        ${card.note || ''}
-      </div>
+ <div class="card-front">
+  ${card.front}
+</div>
+
+<div class="card-answer">
+  ${card.answer}
+</div>
+
+<div class="card-note">
+  ${card.note || ''}
+</div>
       <div style="margin-top:20px;">
         <button id="nextCard">Дальше</button>
         <button id="exitLearn" style="margin-left:10px;">Назад</button>
