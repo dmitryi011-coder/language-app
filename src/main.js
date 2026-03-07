@@ -15,14 +15,13 @@ const languagesContainer = document.querySelector('#languages')
 let languages = JSON.parse(localStorage.getItem('languages')) || []
 
 function renderLanguages() {
-languagesContainer.innerHTML = ''
-  languages.forEach((lang, index) => {
+  languagesContainer.innerHTML = ''
+  languages.forEach((lang) => {
     const btn = document.createElement('button')
-btn.addEventListener('click', () => {
-  currentLanguage = lang
-  renderLanguageScreen()
-})
-
+    btn.addEventListener('click', () => {
+      currentLanguage = lang
+      renderLanguageScreen()
+    })
 
     btn.textContent = lang
     btn.style.display = 'block'
@@ -41,79 +40,82 @@ document.querySelector('#addLang').addEventListener('click', () => {
 })
 
 renderLanguages()
+
 function renderLanguageScreen() {
   document.querySelector("#app").innerHTML = `
-  <div class="screen">
-    <h1>${currentLanguage}</h1>
-    <button id="addWord">Добавить слово</button>
-    <button id="library" style="margin-left:10px;">Библиотека</button>
+    <div class="screen">
+      <h1>${currentLanguage}</h1>
+      <button id="addWord">Добавить слово</button>
+      <button id="library" style="margin-left:10px;">Библиотека</button>
+      <button id="startLearning" style="margin-left:10px;">Начать изучение</button>
+      <button id="reviewArchive" style="margin-left:10px;">Повтор архива</button>
 
-    <button id="startLearning" style="margin-left:10px;">Начать изучение</button>
-    <button id="reviewArchive" style="margin-left:10px;">Повтор архива</button>
-
-    <div style="margin-top:20px;">
-      <button id="back">Назад</button>
+      <div style="margin-top:20px;">
+        <button id="back">Назад</button>
+      </div>
     </div>
-  </div>
-`;
-document.querySelector('#addWord').addEventListener('click', () => {
-  const front = prompt('RU (что показываем)?')
-  if (!front) return
+  `;
 
-  const answer = prompt('SL (правильный ответ)?')
-  if (!answer) return
+  document.querySelector('#addWord').addEventListener('click', () => {
+    const front = prompt('RU (что показываем)?')
+    if (!front) return
 
-  const note = prompt('Заметка (род/формы) — можно пусто') || ''
+    const answer = prompt('SL (правильный ответ)?')
+    if (!answer) return
 
-  const key = `cards:${currentLanguage}`
-  const cards = JSON.parse(localStorage.getItem(key)) || []
+    const note = prompt('Заметка (род/формы) — можно пусто') || ''
 
-  cards.push({
-    id: crypto.randomUUID(),
-    front,
-    answer,
-    note,
-    state: 'LEARN',
-    learnSeen: 0,
-    quizWinStreak: 0,
-    quizLoseStreak: 0,
-    recallWinStreak: 0,
-    recallLoseStreak: 0
+    const key = `cards:${currentLanguage}`
+    const cards = JSON.parse(localStorage.getItem(key)) || []
+
+    cards.push({
+      id: crypto.randomUUID(),
+      front,
+      answer,
+      note,
+      state: 'LEARN',
+      learnSeen: 0,
+      quizWinStreak: 0,
+      quizLoseStreak: 0,
+      recallWinStreak: 0,
+      recallLoseStreak: 0
+    })
+
+    localStorage.setItem(key, JSON.stringify(cards))
   })
 
-  localStorage.setItem(key, JSON.stringify(cards))
-  
-})
-document.querySelector('#library').addEventListener('click', () => {
-  renderLibraryScreen()
-})
-document.querySelector('#startLearning').addEventListener('click', () => {
-  startLearning()
+  document.querySelector('#library').addEventListener('click', () => {
+    renderLibraryScreen()
+  })
 
-})
-document.querySelector('#reviewArchive').addEventListener('click', () => {
-  startArchiveMode()
-})
+  document.querySelector('#startLearning').addEventListener('click', () => {
+    startLearning()
+  })
+
+  document.querySelector('#reviewArchive').addEventListener('click', () => {
+    startArchiveMode()
+  })
 
   document.querySelector('#back').addEventListener('click', () => {
     currentLanguage = null
     location.reload()
   })
 }
+
 function renderLibraryScreen() {
   const key = `cards:${currentLanguage}`
   const cards = JSON.parse(localStorage.getItem(key)) || []
 
   let listHtml = cards.map(c => `
-  <div class="screen">
-    <div><b>RU:</b> ${c.front}</div>
-    <div><b>SL:</b> ${c.answer}</div>
-    <div><b>Note:</b> ${c.note || ''}</div>
-    <div><b>State:</b> ${c.state}</div>
+    <div class="screen">
+      <div><b>RU:</b> ${c.front}</div>
+      <div><b>SL:</b> ${c.answer}</div>
+      <div><b>Note:</b> ${c.note || ''}</div>
+      <div><b>State:</b> ${c.state}</div>
+      <button data-del="${c.id}" style="margin-top:8px;">Удалить</button>
+    </div>
+  `).join('')
 
-    <button data-del="${c.id}" style="margin-top:8px;">Удалить</button>
-  </div>
-`).join('')
   if (!cards.length) listHtml = `<p>Пока пусто</p>`
 
   document.querySelector('#app').innerHTML = `
@@ -139,19 +141,42 @@ function renderLibraryScreen() {
     })
   })
 }
+
+function pickCardAvoidRecent(cards, storageKey, recentLimit = 3) {
+  if (!cards.length) return null
+
+  let recentIds = JSON.parse(localStorage.getItem(storageKey)) || []
+
+  let pool = cards.filter(c => !recentIds.includes(c.id))
+
+  if (!pool.length) {
+    pool = cards
+  }
+
+  const card = pool[Math.floor(Math.random() * pool.length)]
+
+  recentIds = [card.id, ...recentIds.filter(id => id !== card.id)].slice(0, recentLimit)
+  localStorage.setItem(storageKey, JSON.stringify(recentIds))
+
+  return card
+}
+
 function renderLearnScreen() {
   const key = `cards:${currentLanguage}`
   const cards = JSON.parse(localStorage.getItem(key)) || []
 
   const learnCards = cards.filter(c => c.state === 'LEARN')
 
-if (!learnCards.length) {
-  startLearning()
-  return
-}
+  if (!learnCards.length) {
+    startLearning()
+    return
+  }
 
-
-  const card = learnCards[Math.floor(Math.random() * learnCards.length)]
+  const card = pickCardAvoidRecent(
+    learnCards,
+    `recentLearn:${currentLanguage}`,
+    3
+  )
 
   document.querySelector('#app').innerHTML = `
     <div class="screen">
@@ -181,13 +206,13 @@ if (!learnCards.length) {
 
     localStorage.setItem(key, JSON.stringify(cards))
     startLearning()
-
   })
 
   document.querySelector('#exitLearn').addEventListener('click', () => {
     renderLanguageScreen()
   })
 }
+
 function startLearning() {
   const key = `cards:${currentLanguage}`
   const cards = JSON.parse(localStorage.getItem(key)) || []
@@ -196,7 +221,6 @@ function startLearning() {
   const Q = cards.filter(c => c.state === 'QUIZ')
   const R = cards.filter(c => c.state === 'RECALL')
 
-  // если в режиме изучения вообще нет слов (ARCHIVE игнорируем)
   if (!L.length && !Q.length && !R.length) {
     document.querySelector('#app').innerHTML = `
       <div class="screen">
@@ -211,7 +235,6 @@ function startLearning() {
     return
   }
 
-  // выбираем между LEARN/QUIZ/RECALL пропорционально количеству
   const wLearn = L.length
   const wQuiz = Q.length
   const wRecall = R.length
@@ -223,10 +246,6 @@ function startLearning() {
   else renderRecallScreen()
 }
 
-
-
-
-
 function renderQuizScreen() {
   const key = `cards:${currentLanguage}`
   const cards = JSON.parse(localStorage.getItem(key)) || []
@@ -237,17 +256,20 @@ function renderQuizScreen() {
     return
   }
 
-  const card = quizCards[Math.floor(Math.random() * quizCards.length)]
+  const card = pickCardAvoidRecent(
+    quizCards,
+    `recentQuiz:${currentLanguage}`,
+    3
+  )
 
-  // Берём все возможные ответы (из любых стадий)
   const allAnswers = cards.map(c => c.answer)
   const wrongAnswers = allAnswers.filter(a => a !== card.answer)
 
-  const shuffledWrong = wrongAnswers.sort(() => 0.5 - Math.random())
+  const shuffledWrong = [...wrongAnswers].sort(() => 0.5 - Math.random())
   const options = [card.answer, ...shuffledWrong.slice(0, 3)].sort(() => 0.5 - Math.random())
 
   document.querySelector('#app').innerHTML = `
-  <div class="screen">
+    <div class="screen">
       <h2>${currentLanguage} — Квиз</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
@@ -269,7 +291,6 @@ function renderQuizScreen() {
         card.quizWinStreak += 1
         card.quizLoseStreak = 0
 
-        // 3 верных подряд → RECALL
         if (card.quizWinStreak >= 3) {
           card.state = 'RECALL'
           card.quizWinStreak = 0
@@ -281,7 +302,6 @@ function renderQuizScreen() {
 
         alert(`Неправильно ❌\nПравильно: ${card.answer}\n${card.note || ''}`)
 
-        // 2 ошибки подряд → LEARN
         if (card.quizLoseStreak >= 2) {
           card.state = 'LEARN'
           card.learnSeen = 0
@@ -303,28 +323,39 @@ function renderQuizScreen() {
 function renderRecallScreen() {
   const key = `cards:${currentLanguage}`
   const cards = JSON.parse(localStorage.getItem(key)) || []
-const recallCards = cards.filter(c => c.state === 'RECALL')
+  const recallCards = cards.filter(c => c.state === 'RECALL')
 
+  if (!recallCards.length) {
+    document.querySelector('#app').innerHTML = `
+      <div class="screen">
+        <h2>${currentLanguage} — Проверка</h2>
+        <p>Все слова из режима проверки завершены.</p>
+        <div style="margin-top:20px;">
+          <button id="backToLanguage">Назад</button>
+          <button id="continueLearning" style="margin-left:10px;">Продолжить изучение</button>
+        </div>
+      </div>
+    `
 
-if (!recallCards.length) {
-  renderLanguageScreen()
-  return
-}
+    document.querySelector('#backToLanguage').addEventListener('click', () => {
+      renderLanguageScreen()
+    })
 
-let card = recallCards[Math.floor(Math.random() * recallCards.length)]
-const lastId = localStorage.getItem(`lastCard:${currentLanguage}`)
-if (lastId && recallCards.length > 1) {
-  let tries = 0
-  while (card.id === lastId && tries < 10) {
-    card = recallCards[Math.floor(Math.random() * recallCards.length)]
-    tries += 1
+    document.querySelector('#continueLearning').addEventListener('click', () => {
+      startLearning()
+    })
+
+    return
   }
-}
-localStorage.setItem(`lastCard:${currentLanguage}`, card.id)
 
+  const card = pickCardAvoidRecent(
+    recallCards,
+    `recentRecall:${currentLanguage}`,
+    3
+  )
 
   document.querySelector('#app').innerHTML = `
-<div class="screen">
+    <div class="screen">
       <h2>${currentLanguage} — Проверка</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
@@ -338,36 +369,32 @@ localStorage.setItem(`lastCard:${currentLanguage}`, card.id)
   `
 
   document.querySelector('#know').addEventListener('click', () => {
-    // ничего не меняем, просто дальше
-card.recallWinStreak += 1
+    card.recallWinStreak += 1
 
-// 5 верных подряд → ARCHIVE
-if (card.recallWinStreak >= 5) {
-  card.state = 'ARCHIVE'
-  card.recallWinStreak = 0
-}
+    if (card.recallWinStreak >= 5) {
+      card.state = 'ARCHIVE'
+      card.recallWinStreak = 0
+    }
 
-localStorage.setItem(key, JSON.stringify(cards))
-renderRecallScreen()
-
-
+    localStorage.setItem(key, JSON.stringify(cards))
+    startLearning()
   })
-document.querySelector('#dontKnow').addEventListener('click', () => {
-  card.state = 'QUIZ'
-  card.recallWinStreak = 0
-  card.quizWinStreak = 0
-  card.quizLoseStreak = 0
 
-  localStorage.setItem(key, JSON.stringify(cards))
-  renderRecallScreen()
-})
+  document.querySelector('#dontKnow').addEventListener('click', () => {
+    card.state = 'QUIZ'
+    card.recallWinStreak = 0
+    card.quizWinStreak = 0
+    card.quizLoseStreak = 0
 
-
+    localStorage.setItem(key, JSON.stringify(cards))
+    startLearning()
+  })
 
   document.querySelector('#exitArchive').addEventListener('click', () => {
     renderLanguageScreen()
   })
 }
+
 function startArchiveMode() {
   const key = `cards:${currentLanguage}`
   const cards = JSON.parse(localStorage.getItem(key)) || []
@@ -380,10 +407,14 @@ function startArchiveMode() {
     return
   }
 
-  const card = archiveCards[Math.floor(Math.random() * archiveCards.length)]
+  const card = pickCardAvoidRecent(
+    archiveCards,
+    `recentArchive:${currentLanguage}`,
+    3
+  )
 
   document.querySelector('#app').innerHTML = `
-<div class="screen">
+    <div class="screen">
       <h2>${currentLanguage} — Повтор архива</h2>
       <div style="margin-top:20px; font-size:22px;">
         ${card.front}
@@ -402,13 +433,13 @@ function startArchiveMode() {
 
   document.querySelector('#dontKnow').addEventListener('click', () => {
     card.state = 'QUIZ'
-card.learnSeen = 0
-card.quizWinStreak = 0
-card.quizLoseStreak = 0
-card.recallWinStreak = 0
+    card.learnSeen = 0
+    card.quizWinStreak = 0
+    card.quizLoseStreak = 0
+    card.recallWinStreak = 0
 
-localStorage.setItem(key, JSON.stringify(cards))
-startArchiveMode()
+    localStorage.setItem(key, JSON.stringify(cards))
+    startArchiveMode()
   })
 
   document.querySelector('#exitArchive').addEventListener('click', () => {
